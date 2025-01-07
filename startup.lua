@@ -10,7 +10,7 @@ if http.get("https://raw.githubusercontent.com/banana-boye/SI-system/refs/heads/
     shell.run("wget https://raw.githubusercontent.com/banana-boye/SI-system/refs/heads/main/startup.lua startup")
     shell.run("reboot")
 end
-if not fs.exists("SI/basalt.lua") then shell.run("wget https://basalt.madefor.cc/install.lua release SI/basalt.lua") end
+if not fs.exists("SI/basalt.lua") then shell.run("wget run https://basalt.madefor.cc/install.lua release latest.lua SI/basalt.lua") end
 if not fs.exists("SI/main.lua") then shell.run("wget https://raw.githubusercontent.com/banana-boye/SI-system/refs/heads/main/main.lua SI/main.lua") end
 
 -- Run
