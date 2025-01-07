@@ -1,7 +1,7 @@
 -- Check if all files exist
 local version = "0"
 
-if https.get("https://raw.githubusercontent.com/banana-boye/SI-system/refs/heads/main/version.txt").readAll() ~= version then
+if http.get("https://raw.githubusercontent.com/banana-boye/SI-system/refs/heads/main/version.txt").readAll() ~= version then
     for _, file in pairs(fs.list("./")) do
         shell.run("delete "..file)
     end
