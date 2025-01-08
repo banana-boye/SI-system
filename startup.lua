@@ -1,5 +1,5 @@
 -- Check if all files exist
-local version = "1"
+local version = "1.1"
 
 if not fs.exists("SI") then fs.makeDir("SI") end
 if http.get("https://raw.githubusercontent.com/banana-boye/SI-system/refs/heads/main/version.txt").readAll() ~= version then
@@ -14,4 +14,4 @@ if not fs.exists("SI/basalt.lua") then shell.run("wget run https://basalt.madefo
 if not fs.exists("SI/main.lua") then shell.run("wget https://raw.githubusercontent.com/banana-boye/SI-system/refs/heads/main/main.lua SI/main.lua") end
 
 -- Run
-shell.run("main.lua")
+shell.run("SI/main.lua")
