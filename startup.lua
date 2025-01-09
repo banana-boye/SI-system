@@ -12,6 +12,7 @@ if http.get("https://raw.githubusercontent.com/banana-boye/SI-system/refs/heads/
 end
 if not fs.exists("SI/basalt.lua") then shell.run("wget run https://basalt.madefor.cc/install.lua release latest.lua SI/basalt.lua") end
 if not fs.exists("SI/main.lua") then shell.run("wget https://raw.githubusercontent.com/banana-boye/SI-system/refs/heads/main/main.lua SI/main.lua") end
+if not fs.exists("SI/stringtools.lua") then shell.run("wget https://raw.githubusercontent.com/banana-boye/CC_stringtools/refs/heads/main/stringtools.lua SI/stringtools.lua") end
 
 -- Run
 shell.run("SI/main.lua")

@@ -1,4 +1,5 @@
 local basalt = require("basalt")
+require("stringtools")()
 local width, height = term.getSize()
 local halfWidth = width / 2
 
@@ -52,19 +53,42 @@ local testList = {
 
 local function query(search)
     local results = {}
-    local keyword
-        if string.find(itemObject.displayName, "\"has:\"", 1, true) then
-            keyword = "has"
-        end
-    for _, itemObject in pairs(testList) do
-        if keyword == "has" then
-            if
-                string.find(itemObject.displayName, search, 1, true) ~= nil
-                or string.find(itemObject.name, search, 1, true) ~= nil
-            then
+    search = string.lower(search)
+    local hasInclusiveKeyWord = string.startsWithAndRemove(search, "has: ") or string.startsWithAndRemove(search, "has:")
+    if hasInclusiveKeyWord then
+        -- Inclusive search
+        for _, itemObject in pairs(testList) do
+            if string.find(string.lower(itemObject.displayName), hasInclusiveKeyWord) ~= nil then
                 table.insert(results, itemObject)
             end
         end
+    else
+        -- Closest search
+        local scores = {}
+        search = string.fracture(search)
+        for _, itemObject in pairs(testList) do
+            local score = 0
+            for pointer, character in pairs(string.fracture(string.lower(itemObject.displayName))) do
+                if search[pointer] == character then
+                    score = score + 1
+                else
+                    score = score - 1
+                end
+            end
+            if score > 0 then
+                table.insert(scores,{
+                    object = itemObject,
+                    score = score
+                })
+            end
+        end
+        table.sort(scores,function(a,b)
+            return a.score > b.score
+        end)
+        if next(scores) == nil then
+            return {}
+        end
+        table.insert(results, scores[1].object)
     end
     return results
 end
@@ -96,6 +120,9 @@ withdrawMenu.scrollBar = main:addScrollbar()
     end)
 
 local function search()
+    for _, v in pairs(withdrawMenu.searchResults) do
+        v:remove()
+    end
     withdrawMenu.searchResults = {}
     for i, itemObject in pairs(query(withdrawMenu.searchBar:getValue())) do
         local button = main:addButton()
@@ -123,7 +150,7 @@ end
 withdrawMenu.searchBar = main:addInput()
     :setInputType("text")
     :setSize(width-2, 1)
-    :onKey(function(self, event, key)
+    :onKey(function(_, _, key)
         if key == keys.enter or key == keys.numPadEnter then
             search()
         end
