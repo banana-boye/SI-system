@@ -51,13 +51,22 @@ local testList = {
 }
 
 local function query(search)
-    return testList
-    -- for _, itemObject in pairs(testList) do
-    --     if itemObject.displayName == search then
-    --         return {itemObject}
-    --     end
-    -- end
-    -- return {}
+    local results = {}
+    local keyword
+        if string.find(itemObject.displayName, "\"has:\"", 1, true) then
+            keyword = "has"
+        end
+    for _, itemObject in pairs(testList) do
+        if keyword == "has" then
+            if
+                string.find(itemObject.displayName, search, 1, true) ~= nil
+                or string.find(itemObject.name, search, 1, true) ~= nil
+            then
+                table.insert(results, itemObject)
+            end
+        end
+    end
+    return results
 end
 function table.has(tab, value)
     for i, v in pairs(tab) do
@@ -223,7 +232,7 @@ organizeMenu.no = main:addButton()
     :setForeground(colors.white)
     :setBackground(colors.red)
     :onClick(function ()
-        swapMenu(depositMenu, mainMenu)
+        swapMenu(organizeMenu, mainMenu)
     end)
 
 hideMenu(withdrawMenu, true)
