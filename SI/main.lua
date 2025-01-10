@@ -179,8 +179,27 @@ withdrawMenu.finish = main:addButton()
         renderItemList(new, width-22, 1, withdrawAmountMenu, false, 1)
     end)
 
+
+local loadingBar = main:addProgressbar()
+    :setDirection("right")
+    :setSize(width - 3, 3)
+    :setBackground(colors.gray)
+    :setProgressBar(colors.green)
+    :setPosition(2, 10)
+    :hide()
+
 withdrawAmountMenu.finish = main:addButton()
     :setSize(width, 1)
+    :setText("Withdraw")
+    :setBackground(colors.green)
+    :onClick(function (self, _, value)
+        loadingBar:show()
+        local size = #withdrawAmountMenu.amounts
+        for i, v in pairs(withdrawAmountMenu.amounts) do
+            loadfile("SI/withdraw.lua", "t", {itemName = withdrawAmountMenu.buttons[i]:getText(), amount = v:getValue() or 64})()
+            loadingBar:setProgress(i / size * 100)
+        end
+    end)
 
 withdrawAmountMenu.scrollBar = main:addScrollbar()
     :setPosition(width, 2)
@@ -254,13 +273,6 @@ organizeMenu.description = main:addLabel()
     :setPosition(30, 6)
     :setTextAlign("center")
 
-organizeMenu.progressBar = main:addProgressbar()
-    :setDirection("right")
-    :setSize(width - 2, 3)
-    :setBackground(colors.lightGray)
-    :setProgressBar(colors.green)
-    :setPosition(2, 10)
-
 organizeMenu.yes = main:addButton()
     :setText("Yes")
     :setSize(10,3)
@@ -269,6 +281,7 @@ organizeMenu.yes = main:addButton()
     :setBackground(colors.green)
     :onClick(function ()
         organizeMenu.progressBar:setBackground(colors.gray)
+        loadingBar:show()
         organizeMenu.yes:hide()
         organizeMenu.no:hide()
         organizeMenu.areYouSure:hide()
@@ -281,7 +294,7 @@ organizeMenu.yes = main:addButton()
         local progress = textutils.unserialiseJSON(progressFile.readAll())
         while progress ~= 100 do
             progress = textutils.unserialiseJSON(progressFile.readAll())
-            organizeMenu.progressBar:setProgressBar(progress)
+            loadingBar:setProgressBar(progress)
         end
     end)
 

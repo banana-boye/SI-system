@@ -6,9 +6,11 @@ end)
 
 local itemKnowledge = textutils.unserialiseJSON(fs.readAndClose("SI/itemKnowledge.json"))
 
-for _, selectedName in pairs(selected) do
-    -- {"left":{"count":1,"slot":[3]}}
-    for inventory, info in pairs(itemKnowledge[selectedName].slotMap) do
-        inputOutput.pullItems(inventory, info.slot)
+for peri, data in pairs(itemKnowledge[itemName].slotMap) do
+    if amount <= 0 then
+        break;
+    end
+    for _, slot in pairs(data.slot) do
+        amount = amount - inputOutput.pullItems(peri, slot, amount)
     end
 end
