@@ -15,6 +15,7 @@ itemKnowledge = textutils.unserialiseJSON(fs.readAndClose("SI/itemKnowledge.json
 
 local mainMenu = {}
 local withdrawMenu = {}
+local withdrawAmountMenu = {}
 local depositMenu = {}
 local organizeMenu = {}
 
@@ -41,8 +42,9 @@ local function query(search)
     local hasInclusiveKeyWord = string.startsWithAndRemove(search, "has: ") or string.startsWithAndRemove(search, "has:")
     if hasInclusiveKeyWord then
         -- Inclusive search
-        for _, itemObject in pairs(itemKnowledge) do
+        for name, itemObject in pairs(itemKnowledge) do
             if string.find(string.lower(itemObject.displayName), hasInclusiveKeyWord) ~= nil then
+                itemObject.name = name
                 table.insert(results, itemObject)
             end
         end
@@ -50,16 +52,18 @@ local function query(search)
         -- Closest search
         local scores = {}
         search = string.fracture(search)
-        for _, itemObject in pairs(itemKnowledge) do
+        for name, itemObject in pairs(itemKnowledge) do
             local score = 0
-            for pointer, character in pairs(string.fracture(string.lower(itemObject.displayName))) do
-                if search[pointer] == character then
+            local frac = string.fracture(string.lower(itemObject.displayName))
+            for pointer, character in pairs(search) do
+                if frac[pointer] == character then
                     score = score + 1
                 else
                     score = score - 1
                 end
             end
             table.insert(scores,{
+                name = name,
                 object = itemObject,
                 score = score
             })
@@ -68,6 +72,7 @@ local function query(search)
             return a.score > b.score
         end)
         for _, value in ipairs(scores) do
+            value.object.name = value.name
             table.insert(results, value.object)
         end
     end
@@ -76,6 +81,8 @@ end
 
 withdrawMenu.selected = {}
 withdrawMenu.searchResults = {}
+withdrawAmountMenu.amounts = {}
+withdrawAmountMenu.buttons = {}
 
 withdrawMenu.scrollBar = main:addScrollbar()
     :setPosition(width, 2)
@@ -92,25 +99,34 @@ withdrawMenu.scrollBar = main:addScrollbar()
         end
     end)
 
-local function renderItemList(itemList, sizeX, sizeY)
-    for i, itemObject in pairs(itemList) do
+local function renderItemList(itemList, sizeX, sizeY, menu, clickable, start)
+    for _, itemObject in pairs(itemList) do
         local button = main:addButton()
             :setSize(sizeX,sizeY)
-            :setPosition(1, i+1)
+            :setPosition(1, start+1)
             :setText(itemObject.displayName.." x"..itemObject.count)
-            :setBackground(table.hasValue(withdrawMenu.selected, itemObject.name) ~= 0 and colors.green or colors.gray)
-            :onClick(function(self)
-                withdrawMenu.searchResults[i].selected = not withdrawMenu.searchResults[i].selected
-                if withdrawMenu.searchResults[i].selected then
+            :setBackground(clickable and (menu.selected[itemObject.name] ~= nil and colors.green or colors.gray) or colors.gray)
+        if clickable then
+            button:onClick(function(self)
+                if menu.selected[itemObject.name] == nil then
+                    menu.selected[itemObject.name] = itemObject
                     self:setBackground(colors.green)
-                    table.insert(withdrawMenu.selected, itemObject.name)
                 else
+                    menu.selected[itemObject.name] = nil
                     self:setBackground(colors.gray)
-                    withdrawMenu.selected[table.hasValue(withdrawMenu.selected, itemObject.name)] = nil
                 end
             end)
-            
-        table.insert(withdrawMenu.searchResults, button)
+            table.insert(menu.searchResults, button)
+        else
+            local textBox = main:addInput()
+                :setInputType("number")
+                :setSize(sizeX-2, sizeY)
+                :setPosition(sizeX, start+1)
+                textBox.object = itemObject
+            table.insert(menu.amounts, textBox)
+            table.insert(menu.buttons, button)
+        end
+        start = start + 1
     end
 end
 
@@ -119,7 +135,7 @@ local function search()
         v:remove()
     end
     withdrawMenu.searchResults = {}
-    renderItemList(query(withdrawMenu.searchBar:getValue()), width-1, 1)
+    renderItemList(query(withdrawMenu.searchBar:getValue()), width-1, 1, withdrawMenu, true, 1)
     withdrawMenu.scrollBar:setScrollAmount(#withdrawMenu.searchResults)
 end
 
@@ -148,7 +164,46 @@ withdrawMenu.finish = main:addButton()
     :setText("\187")
     :setBackground(colors.green)
     :onClick(function ()
+        for _, v in pairs(withdrawMenu.searchResults) do
+            v:remove()
+        end
+        local new = {}
+        for _, value in pairs(withdrawMenu.selected) do
+            table.insert(new, value)
+        end
+        withdrawMenu.selected = {}
+        withdrawMenu.searchResults = {}
+        swapMenu(withdrawMenu, withdrawAmountMenu)
+        withdrawMenu.searchResults = {}
         
+        renderItemList(new, width-22, 1, withdrawAmountMenu, false, 1)
+    end)
+
+withdrawAmountMenu.finish = main:addButton()
+    :setSize(width, 1)
+
+withdrawAmountMenu.scrollBar = main:addScrollbar()
+    :setPosition(width, 2)
+    :setSize(1, height - 1)
+    :onChange(function (self, _, value)
+        for i, v in pairs(withdrawAmountMenu.amounts) do
+            local newPos = i - value + 2
+            if newPos <= 1 then
+                v:hide()
+            else
+                v:show()
+                v:setPosition(width-22, newPos)
+            end
+        end
+        for i, v in pairs(withdrawAmountMenu.amounts) do
+            local newPos = i - value + 2
+            if newPos <= 1 then
+                v:hide()
+            else
+                v:show()
+                v:setPosition(1, newPos)
+            end
+        end
     end)
 
 depositMenu.areYouSure = main:addLabel()
@@ -243,6 +298,7 @@ organizeMenu.no = main:addButton()
 hideMenu(withdrawMenu, true)
 hideMenu(depositMenu, true)
 hideMenu(organizeMenu, true)
+hideMenu(withdrawAmountMenu, true)
 
 mainMenu.title = main:addLabel()
     :setText("SI system")
