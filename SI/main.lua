@@ -195,7 +195,7 @@ withdrawAmountMenu.scrollBar = main:addScrollbar()
                 v:setPosition(width-22, newPos)
             end
         end
-        for i, v in pairs(withdrawAmountMenu.amounts) do
+        for i, v in pairs(withdrawAmountMenu.buttons) do
             local newPos = i - value + 2
             if newPos <= 1 then
                 v:hide()
