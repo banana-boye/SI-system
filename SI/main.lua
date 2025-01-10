@@ -1,9 +1,17 @@
 local basalt = require("basalt")
-require("stringtools")()
+require("extratools")()
 local width, height = term.getSize()
+local synthFileFunction = loadfile("SI/synth.lua")
 local halfWidth = width / 2
-
 local main = basalt.createFrame()
+fs.default("SI/itemKnowledge.json", "{}")
+local itemKnowledge
+
+main:addThread():start(function()
+    synthFileFunction()
+    itemKnowledge = textutils.unserialiseJSON(fs.readAndClose("SI/itemKnowledge.json"))
+end)
+itemKnowledge = textutils.unserialiseJSON(fs.readAndClose("SI/itemKnowledge.json"))
 
 local mainMenu = {}
 local withdrawMenu = {}
@@ -27,37 +35,13 @@ local function swapMenu(from, to)
     hideMenu(to, false)
 end
 
-local testList = {
-    {
-    displayName = "Wood",
-    name = "wood",
-    modId = "test",
-    amount = 64,
-    selected = false
-},
-    {
-        displayName = "Log",
-        name = "log",
-    modId = "test",
-    amount = 32,
-    selected = false
-},
-{
-        displayName = "Stone",
-        name = "stone",
-    modId = "test",
-    amount = 1,
-    selected = false
-}
-}
-
 local function query(search)
     local results = {}
     search = string.lower(search)
     local hasInclusiveKeyWord = string.startsWithAndRemove(search, "has: ") or string.startsWithAndRemove(search, "has:")
     if hasInclusiveKeyWord then
         -- Inclusive search
-        for _, itemObject in pairs(testList) do
+        for _, itemObject in pairs(itemKnowledge) do
             if string.find(string.lower(itemObject.displayName), hasInclusiveKeyWord) ~= nil then
                 table.insert(results, itemObject)
             end
@@ -66,7 +50,7 @@ local function query(search)
         -- Closest search
         local scores = {}
         search = string.fracture(search)
-        for _, itemObject in pairs(testList) do
+        for _, itemObject in pairs(itemKnowledge) do
             local score = 0
             for pointer, character in pairs(string.fracture(string.lower(itemObject.displayName))) do
                 if search[pointer] == character then
@@ -91,14 +75,6 @@ local function query(search)
         table.insert(results, scores[1].object)
     end
     return results
-end
-function table.has(tab, value)
-    for i, v in pairs(tab) do
-        if v == value then
-            return i
-        end
-    end
-    return 0
 end
 
 withdrawMenu.selected = {}
