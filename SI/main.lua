@@ -59,20 +59,17 @@ local function query(search)
                     score = score - 1
                 end
             end
-            if score > 0 then
-                table.insert(scores,{
-                    object = itemObject,
-                    score = score
-                })
-            end
+            table.insert(scores,{
+                object = itemObject,
+                score = score
+            })
         end
         table.sort(scores,function(a,b)
             return a.score > b.score
         end)
-        if next(scores) == nil then
-            return {}
+        for _, value in ipairs(scores) do
+            table.insert(results, value.object)
         end
-        table.insert(results, scores[1].object)
     end
     return results
 end
@@ -95,17 +92,13 @@ withdrawMenu.scrollBar = main:addScrollbar()
         end
     end)
 
-local function search()
-    for _, v in pairs(withdrawMenu.searchResults) do
-        v:remove()
-    end
-    withdrawMenu.searchResults = {}
-    for i, itemObject in pairs(query(withdrawMenu.searchBar:getValue())) do
+local function renderItemList(itemList, sizeX, sizeY)
+    for i, itemObject in pairs(itemList) do
         local button = main:addButton()
-            :setSize(width-1,1)
+            :setSize(sizeX,sizeY)
             :setPosition(1, i+1)
-            :setText(itemObject.displayName.." x"..itemObject.amount)
-            :setBackground(table.has(withdrawMenu.selected, itemObject.name) ~= 0 and colors.green or colors.gray)
+            :setText(itemObject.displayName.." x"..itemObject.count)
+            :setBackground(table.hasValue(withdrawMenu.selected, itemObject.name) ~= 0 and colors.green or colors.gray)
             :onClick(function(self)
                 withdrawMenu.searchResults[i].selected = not withdrawMenu.searchResults[i].selected
                 if withdrawMenu.searchResults[i].selected then
@@ -113,13 +106,20 @@ local function search()
                     table.insert(withdrawMenu.selected, itemObject.name)
                 else
                     self:setBackground(colors.gray)
-                    withdrawMenu.selected[table.has(withdrawMenu.selected, itemObject.name)] = nil
+                    withdrawMenu.selected[table.hasValue(withdrawMenu.selected, itemObject.name)] = nil
                 end
             end)
             
         table.insert(withdrawMenu.searchResults, button)
     end
+end
 
+local function search()
+    for _, v in pairs(withdrawMenu.searchResults) do
+        v:remove()
+    end
+    withdrawMenu.searchResults = {}
+    renderItemList(query(withdrawMenu.searchBar:getValue()), width-1, 1)
     withdrawMenu.scrollBar:setScrollAmount(#withdrawMenu.searchResults)
 end
 
@@ -147,7 +147,9 @@ withdrawMenu.finish = main:addButton()
     :setSize(1,1)
     :setText("\187")
     :setBackground(colors.green)
-    :onClick() -- run withdraw file
+    :onClick(function ()
+        
+    end)
 
 depositMenu.areYouSure = main:addLabel()
     :setText("Are you sure?")

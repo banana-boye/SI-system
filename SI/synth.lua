@@ -1,19 +1,15 @@
 local drawer = peripheral.find("storagedrawers:controller")
 local itemVault = peripheral.find("create_connected:item_silo") or peripheral.find("create:item_vault")
-local inputOutput = peripheral.find("inventory", function (name, _)
-    return name ~= peripheral.getName(drawer) and name ~= peripheral.getName(itemVault)
-end)
 
-if not drawer or not itemVault or not inputOutput then
-    return {}
+if not drawer or not itemVault then
+    return
 end
-
 local itemKnowledgeFile = fs.open("SI/itemKnowledge.json", "w")
 local currentKnowledge = {}
 
 local function cycleInventory(inventory)
     local list = inventory.list()
-    for slot, _ in ipairs(list) do
+    for slot, _ in pairs(list) do
         local detail = inventory.getItemDetail(slot)
         if currentKnowledge[detail.name] then
             currentKnowledge[detail.name].count = currentKnowledge[detail.name].count + detail.count
