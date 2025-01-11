@@ -4,9 +4,11 @@ local version = "1"
 if not fs.exists("SI") then fs.makeDir("SI") end
 if http.get("https://raw.githubusercontent.com/banana-boye/SI-system/refs/heads/main/version.txt").readAll() ~= version then
     for _, file in pairs(fs.list("SI")) do
-        shell.run("delete SI/"..file)
+        if file then
+            shell.run("delete SI/"..file)
+        end
     end
-    shell.run("delete startup")
+    shell.run("delete startup.lua")
     shell.run("wget https://raw.githubusercontent.com/banana-boye/SI-system/refs/heads/main/startup.lua startup")
     shell.run("reboot")
 end
