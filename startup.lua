@@ -13,7 +13,7 @@ if http.get("https://raw.githubusercontent.com/banana-boye/SI-system/refs/heads/
     shell.run("reboot")
 end
 if not fs.exists("SI/basalt.lua") then shell.run("wget run https://basalt.madefor.cc/install.lua release latest.lua SI/basalt.lua") end
-if not fs.exists("SI/main.lua") then shell.run("wget https://raw.githubusercontent.com/banana-boye/SI-system/refs/heads/main/main.lua SI/main.lua") end
+if not fs.exists("SI/main.lua") then shell.run("wget https://raw.githubusercontent.com/banana-boye/SI-system/refs/heads/main/SI/main.lua SI/main.lua") end
 if not fs.exists("SI/extratools.lua") then shell.run("wget https://raw.githubusercontent.com/banana-boye/SI-system/refs/heads/main/SI/extratools.lua SI/extratools.lua") end
 if not fs.exists("SI/synth.lua") then shell.run("wget https://raw.githubusercontent.com/banana-boye/SI-system/refs/heads/main/SI/synth.lua SI/synth.lua") end
 if not fs.exists("SI/withdraw.lua") then shell.run("wget https://raw.githubusercontent.com/banana-boye/SI-system/refs/heads/main/SI/withdraw.lua SI/withdraw.lua") end
