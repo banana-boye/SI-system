@@ -59,7 +59,11 @@ local function query(search)
         -- Closest search
         local scores = {}
         search = string.fracture(search)
+        local limit = 100
         for name, itemObject in pairs(itemKnowledge) do
+            if limit == 0 then
+                break
+            end
             local score = 0
             local frac = string.fracture(string.lower(itemObject.displayName))
             for pointer, character in pairs(search) do
@@ -74,6 +78,7 @@ local function query(search)
                 object = itemObject,
                 score = score
             })
+            limit = limit - 1
         end
         table.sort(scores,function(a,b)
             return a.score > b.score
