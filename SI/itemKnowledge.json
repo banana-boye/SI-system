@@ -1,1 +1,1 @@
-{"minecraft:chest":{"slotMap":{"bottom":{"count":1,"slot":[1]}},"count":1,"displayName":"Chest"},"minecraft:oak_log":{"slotMap":{"left":{"count":9216,"slot":[2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]}},"count":9216,"displayName":"Oak Log"},"create_connected:item_silo":{"slotMap":{"bottom":{"count":1,"slot":[2]}},"count":1,"displayName":"Item Silo"}}
+{"minecraft:oak_log":{"displayName":"Oak Log","count":9152,"slotMap":{"left":{"count":9152,"slot":[2,3,4,6,7,8,9,10,11,12,13,14,15,16,17,18,20,21]}}}}

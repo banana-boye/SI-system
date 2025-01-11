@@ -205,7 +205,7 @@ withdrawAmountMenu.finish = main:addButton()
         for i, v in pairs(withdrawAmountMenu.amounts) do
             loadfile("SI/withdraw.lua", "t", {
                 itemName = v.objectName,
-                amount = v:getValue() or 64,
+                amount = tonumber(v:getValue()) or 64,
                 peripheral = peripheral, textutils = textutils,
                 fs = fs,
                 string = string,
