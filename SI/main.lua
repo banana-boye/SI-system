@@ -218,14 +218,7 @@ withdrawAmountMenu.finish = main:addButton()
                 table = table
             })()
             loadingBar:setProgress(i / size * 100)
-        end
-
-        synthThread:start(function()
-            if synthing then return end
-            synthing = true
-            synthFileFunction()
-            itemKnowledge = textutils.unserialiseJSON(fs.readAndClose("SI/itemKnowledge.json"))
-        end)
+        end        
         loadingBar:hide()
         swapMenu(withdrawAmountMenu, mainMenu)
     end)
