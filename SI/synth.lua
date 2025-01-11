@@ -4,7 +4,6 @@ local itemVault = peripheral.find("create_connected:item_silo") or peripheral.fi
 if not drawer or not itemVault then
     return
 end
-local itemKnowledgeFile = fs.open("SI/itemKnowledge.json", "w")
 local currentKnowledge = {}
 
 local function cycleInventory(inventory)
@@ -40,4 +39,6 @@ end
 cycleInventory(drawer)
 cycleInventory(itemVault)
 
+local itemKnowledgeFile = fs.open("SI/itemKnowledge.json", "w")
 itemKnowledgeFile.write(textutils.serialiseJSON(currentKnowledge))
+itemKnowledgeFile.close()

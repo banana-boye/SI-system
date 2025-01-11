@@ -3,18 +3,11 @@ local itemVault = peripheral.find("create_connected:item_silo") or peripheral.fi
 local inputOutput = peripheral.find("inventory", function (name, _)
     return name ~= peripheral.getName(drawer) and name ~= peripheral.getName(itemVault)
 end)
-local inputSize = inputOutput.size()
 
 local itemKnowledge = textutils.unserialiseJSON(fs.readAndClose("SI/itemKnowledge.json"))
-local current = 0
 
-for peri, data in pairs(itemKnowledge[itemName].slotMap) do
-    if current >= amount or current >= inputSize then
-        break;
-    end
-    for _, slot in pairs(data.slot) do
-        current = current + inputOutput.pullItems(peri, slot, amount - current)
-    end
+for slot, _ in pairs(inputOutput.list()) do
+    inputOutput.pushItems(peripheral.getName(drawer), slot)
 end
 
 local itemKnowledgeFile = fs.open("SI/itemKnowledge.json", "w")

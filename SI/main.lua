@@ -2,14 +2,21 @@ local basalt = require("basalt")
 require("extratools")()
 local width, height = term.getSize()
 local synthFileFunction = loadfile("SI/synth.lua")
+local depositFileFunction = loadfile("SI/deposit.lua")
 local halfWidth = width / 2
 local main = basalt.createFrame()
+local synthing = false
 fs.default("SI/itemKnowledge.json", "{}")
+
 local itemKnowledge
 
-main:addThread():start(function()
+local synthThread = main:addThread()
+synthThread:start(function()
+    if synthing then return end
+    synthing = true
     synthFileFunction()
     itemKnowledge = textutils.unserialiseJSON(fs.readAndClose("SI/itemKnowledge.json"))
+    synthing = false
 end)
 itemKnowledge = textutils.unserialiseJSON(fs.readAndClose("SI/itemKnowledge.json"))
 
@@ -122,7 +129,7 @@ local function renderItemList(itemList, sizeX, sizeY, menu, clickable, start)
                 :setInputType("number")
                 :setSize(sizeX-2, sizeY)
                 :setPosition(sizeX, start+1)
-                textBox.object = itemObject
+                textBox.objectName = itemObject.name
             table.insert(menu.amounts, textBox)
             table.insert(menu.buttons, button)
         end
@@ -196,9 +203,26 @@ withdrawAmountMenu.finish = main:addButton()
         loadingBar:show()
         local size = #withdrawAmountMenu.amounts
         for i, v in pairs(withdrawAmountMenu.amounts) do
-            loadfile("SI/withdraw.lua", "t", {itemName = withdrawAmountMenu.buttons[i]:getText(), amount = v:getValue() or 64})()
+            loadfile("SI/withdraw.lua", "t", {
+                itemName = v.objectName,
+                amount = v:getValue() or 64,
+                peripheral = peripheral, textutils = textutils,
+                fs = fs,
+                string = string,
+                pairs = pairs,
+                table = table
+            })()
             loadingBar:setProgress(i / size * 100)
         end
+
+        synthThread:start(function()
+            if synthing then return end
+            synthing = true
+            synthFileFunction()
+            itemKnowledge = textutils.unserialiseJSON(fs.readAndClose("SI/itemKnowledge.json"))
+        end)
+        loadingBar:hide()
+        swapMenu(withdrawAmountMenu, mainMenu)
     end)
 
 withdrawAmountMenu.scrollBar = main:addScrollbar()
@@ -243,7 +267,10 @@ depositMenu.yes = main:addButton()
     :setPosition(13,10)
     :setForeground(colors.white)
     :setBackground(colors.green)
-    :onClick() -- deposit shit
+    :onClick(function ()
+        depositFileFunction()
+        swapMenu(depositMenu, mainMenu)
+    end)
 
 depositMenu.no = main:addButton()
     :setText("No")
@@ -280,7 +307,6 @@ organizeMenu.yes = main:addButton()
     :setForeground(colors.white)
     :setBackground(colors.green)
     :onClick(function ()
-        organizeMenu.progressBar:setBackground(colors.gray)
         loadingBar:show()
         organizeMenu.yes:hide()
         organizeMenu.no:hide()
@@ -288,14 +314,30 @@ organizeMenu.yes = main:addButton()
         organizeMenu.organizing:setPosition(halfWidth - 15, 2)
         organizeMenu.description:hide()
 
-        --organize
-        
-        local progressFile = fs.open("progress.json", "r")
-        local progress = textutils.unserialiseJSON(progressFile.readAll())
-        while progress ~= 100 do
-            progress = textutils.unserialiseJSON(progressFile.readAll())
-            loadingBar:setProgressBar(progress)
+        local i = 1
+        local iKSize = #itemKnowledge
+
+        for name, data in pairs(itemKnowledge) do
+            loadfile("SI/organize.lua", "t", {
+                name = name,
+                slotMap = data.slotMap,
+                count = data.count,
+                peripheral = peripheral,
+                pairs = pairs,
+                error = error,
+                textutils = textutils
+            })()
+            loadingBar:setProgress((i - 1) / iKSize * 100)
+            i = i + 1
         end
+
+        synthing = true
+        synthFileFunction()
+        itemKnowledge = textutils.unserialiseJSON(fs.readAndClose("SI/itemKnowledge.json"))
+        synthing = false
+
+        loadingBar:hide()
+        swapMenu(organizeMenu, mainMenu)
     end)
 
 organizeMenu.no = main:addButton()
