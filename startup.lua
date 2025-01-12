@@ -1,5 +1,5 @@
 -- Check if all files exist
-local version = 1.01
+local version = 1
 
 if not fs.exists("SI") then fs.makeDir("SI") end
 if tonumber(http.get("https://raw.githubusercontent.com/banana-boye/SI-system/refs/heads/main/version.txt").readAll()) ~= version then
