@@ -1,8 +1,8 @@
 -- Check if all files exist
-local version = "1.1"
+local version = 1.01
 
 if not fs.exists("SI") then fs.makeDir("SI") end
-if http.get("https://raw.githubusercontent.com/banana-boye/SI-system/refs/heads/main/version.txt").readAll() ~= version then
+if tonumber(http.get("https://raw.githubusercontent.com/banana-boye/SI-system/refs/heads/main/version.txt").readAll()) ~= version then
     for _, file in pairs(fs.list("SI")) do
         if file then
             shell.run("delete SI/"..file)
